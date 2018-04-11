@@ -7,23 +7,25 @@ namespace MerelsRules.ConsoleApp
         static void Main(string[] args)
         {
             gm = GameManager.GetInstance();
-            //for(int i = 0; i < 6; i++)
-            //{
-            //    Console.WriteLine(PrintBoard());
-            //    GameManager.Piece p = i % 2 == 0 ? GameManager.Piece.O : GameManager.Piece.X;
-            //    Console.WriteLine("Where do you want to place a " + p.ToString() + "? ");
-            //    int loc = int.Parse(Console.ReadLine());
-            //    gm.Board[loc] = p;
-            //    gm.PieceLocations[((i % 2) * 3) + (i / 2)] = loc;
-            //}
-            int[] locations = new[] { 0, 1, 2, 6, 7, 8 };
+
             for (int i = 0; i < 6; i++)
             {
+                Console.WriteLine(PrintBoard());
                 GameManager.Piece p = i % 2 == 0 ? GameManager.Piece.O : GameManager.Piece.X;
-                int loc = locations[i];
+                Console.WriteLine("Where do you want to place a " + p.ToString() + "? ");
+                int loc = int.Parse(Console.ReadLine());
                 gm.Board[loc] = p;
                 gm.PieceLocations[((i % 2) * 3) + (i / 2)] = loc;
             }
+
+            //int[] locations = new[] { 0, 1, 2, 6, 7, 8 };
+            //for (int i = 0; i < 6; i++)
+            //{
+            //    GameManager.Piece p = i % 2 == 0 ? GameManager.Piece.O : GameManager.Piece.X;
+            //    int loc = locations[i];
+            //    gm.Board[loc] = p;
+            //    gm.PieceLocations[((i % 2) * 3) + (i / 2)] = loc;
+            //}
 
             Console.WriteLine("\nBeginning Game\n");
 
