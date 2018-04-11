@@ -49,7 +49,7 @@ namespace MerelsRules
         public void Reset()
         {
             Board = new Piece[9];
-            PieceLocations = new int[6];
+            PieceLocations = new int[6] { -1, -1, -1, -1, -1, -1 };
             CurrentTurn = Piece.O;
             SetPlayer(Piece.O);
             _choiceInitial = 0;
@@ -66,7 +66,15 @@ namespace MerelsRules
         {
             if (CurrentTurn == Player)
             {
-                var boardAndPieceLocations = MakeBoardMove(Board, PieceLocations, CurrentTurn, moveInitial, moveDestination);
+                Tuple<Piece[], int[]> boardAndPieceLocations;
+                if (!CheckPlacementDone(PieceLocations, CurrentTurn))
+                {
+                    boardAndPieceLocations = MakeBoardPlacement(Board, PieceLocations, CurrentTurn, moveDestination);
+                }
+                else
+                {
+                    boardAndPieceLocations = MakeBoardMove(Board, PieceLocations, CurrentTurn, moveInitial, moveDestination);
+                }
                 Board = boardAndPieceLocations.Item1;
                 PieceLocations = boardAndPieceLocations.Item2;
                 CurrentTurn = SwitchPiece(CurrentTurn);
@@ -74,7 +82,15 @@ namespace MerelsRules
             else if (CurrentTurn == Computer)
             {
                 int score = MiniMax(new Tuple<Piece[], int[]>(Board, PieceLocations), CurrentTurn, 0);
-                var boardAndPieceLocations = MakeBoardMove(Board, PieceLocations, CurrentTurn, _choiceInitial, _choiceDestination);
+                Tuple<Piece[], int[]> boardAndPieceLocations;
+                if (!CheckPlacementDone(PieceLocations, CurrentTurn))
+                {
+                    boardAndPieceLocations = MakeBoardPlacement(Board, PieceLocations, CurrentTurn, _choiceDestination);
+                }
+                else
+                {
+                    boardAndPieceLocations = MakeBoardMove(Board, PieceLocations, CurrentTurn, _choiceInitial, _choiceDestination);
+                }
                 Board = boardAndPieceLocations.Item1;
                 PieceLocations = boardAndPieceLocations.Item2;
                 CurrentTurn = SwitchPiece(CurrentTurn);
@@ -87,6 +103,7 @@ namespace MerelsRules
         {
             Piece[] inputBoard = boardAndLocations.Item1;
             int[] inputPieceLocations = boardAndLocations.Item2;
+
             Piece[] board = new Piece[inputBoard.Length];
             Array.Copy(inputBoard, board, inputBoard.Length);
 
@@ -100,11 +117,26 @@ namespace MerelsRules
             List<int> scores = new List<int>();
             List<Tuple<int, int>> moves = new List<Tuple<int, int>>();
 
-            for(int p = ((int) player - 1) * 3; p < 3 + ((int) player - 1) * 3; p++)
+            if(!CheckPlacementDone(pieceLocations, player))
             {
-                foreach(int m in GetMoves(board, player, pieceLocations[p])){
-                    scores.Add(MiniMax(MakeBoardMove(board, pieceLocations, player, pieceLocations[p], m), SwitchPiece(player), depth + 1));
-                    moves.Add(new Tuple<int, int>(pieceLocations[p], m));
+                for(int l = 0; l < board.Length; l++)
+                {
+                    if(board[l] == Piece.Empty)
+                    {
+                        scores.Add(MiniMax(MakeBoardPlacement(board, pieceLocations, player, l), SwitchPiece(player), depth + 1));
+                        moves.Add(new Tuple<int, int>(-1, l));
+                    }
+                }
+            }
+            else
+            {
+                for (int p = ((int)player - 1) * 3; p < 3 + ((int)player - 1) * 3; p++)
+                {
+                    foreach (int m in GetMoves(board, player, pieceLocations[p]))
+                    {
+                        scores.Add(MiniMax(MakeBoardMove(board, pieceLocations, player, pieceLocations[p], m), SwitchPiece(player), depth + 1));
+                        moves.Add(new Tuple<int, int>(pieceLocations[p], m));
+                    }
                 }
             }
 
@@ -135,8 +167,8 @@ namespace MerelsRules
             Debug.Assert(location < board.Length);
 
             List<int> moves = new List<int>();
-            if (location + 1 < board.Length && board[location + 1] == Piece.Empty) moves.Add(location + 1);
-            if (location - 1 >= 0 && board[location - 1] == Piece.Empty) moves.Add(location - 1);
+            if (location + 1 < board.Length && (location + 1) % 3 != 0 && board[location + 1] == Piece.Empty) moves.Add(location + 1);
+            if (location - 1 >= 0 && location % 3 != 0 && board[location - 1] == Piece.Empty) moves.Add(location - 1);
             if (location + 3 < board.Length && board[location + 3] == Piece.Empty) moves.Add(location + 3);
             if (location - 3 >= 0 && board[location - 3] == Piece.Empty) moves.Add(location - 3);
 
@@ -203,6 +235,30 @@ namespace MerelsRules
             newPieceLocations[Array.IndexOf(newPieceLocations, initial)] = destination;
 
             return new Tuple<Piece[], int[]>(newBoard, newPieceLocations);
+        }
+
+        private static Tuple<Piece[], int[]> MakeBoardPlacement(Piece[] board, int[] pieceLocations, Piece piece, int location)
+        {
+            //changes location of piece in board
+            Piece[] newBoard = new Piece[board.Length];
+            Array.Copy(board, newBoard, board.Length);
+            newBoard[location] = piece;
+
+            //changes location of piece in list of piece locations
+            int[] newPieceLocations = new int[pieceLocations.Length];
+            Array.Copy(pieceLocations, newPieceLocations, pieceLocations.Length);
+            int index = ((int)piece - 1) * 3;
+            newPieceLocations[Array.IndexOf(newPieceLocations, -1, index)] = location;
+
+            return new Tuple<Piece[], int[]>(newBoard, newPieceLocations);
+        }
+
+        private static bool CheckPlacementDone(int[] pieceLocations, Piece player)
+        {
+            int[] newPieceLocations = new int[pieceLocations.Length];
+            int index = ((int)player - 1) * 3;
+            Array.Copy(pieceLocations, index, newPieceLocations, 0, 3);
+            return Array.IndexOf(newPieceLocations, -1) < 0;
         }
     }
 }

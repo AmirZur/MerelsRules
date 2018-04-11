@@ -8,55 +8,17 @@ namespace MerelsRules.ConsoleApp
         {
             gm = GameManager.GetInstance();
 
-            for (int i = 0; i < 6; i++)
+            Console.WriteLine("Welcome to Merels Rules!");
+            Console.WriteLine("Would you like to move first? (y/n)");
+            String response = Console.ReadLine();
+            if (response.Equals("y"))
             {
-                Console.WriteLine(PrintBoard());
-                GameManager.Piece p = i % 2 == 0 ? GameManager.Piece.O : GameManager.Piece.X;
-                Console.WriteLine("Where do you want to place a " + p.ToString() + "? ");
-                int loc = int.Parse(Console.ReadLine());
-                gm.Board[loc] = p;
-                gm.PieceLocations[((i % 2) * 3) + (i / 2)] = loc;
+                PlayPlayerFirst();
             }
-
-            //int[] locations = new[] { 0, 1, 2, 6, 7, 8 };
-            //for (int i = 0; i < 6; i++)
-            //{
-            //    GameManager.Piece p = i % 2 == 0 ? GameManager.Piece.O : GameManager.Piece.X;
-            //    int loc = locations[i];
-            //    gm.Board[loc] = p;
-            //    gm.PieceLocations[((i % 2) * 3) + (i / 2)] = loc;
-            //}
-
-            Console.WriteLine("\nBeginning Game\n");
-
-            while(true)
+            else
             {
-                Console.WriteLine(PrintBoard());
-                Console.WriteLine("What piece do you want to move (0-9)? ");
-                int initial = int.Parse(Console.ReadLine());
-                Console.WriteLine("Where do you want to move the piece (0-9)? ");
-                int destination = int.Parse(Console.ReadLine());
-                Console.WriteLine();
-                //player
-                gm.MakeMove(initial, destination);
-                Console.WriteLine("Your move:");
-                Console.WriteLine(PrintBoard() + "\n");
-                if (gm.CheckGameEnd())
-                {
-                    Console.WriteLine("You won!");
-                    break;
-                }
-                //computer
-                Tuple<int, int> compMove = gm.MakeMove(initial, destination);
-                Console.WriteLine("The computer moved the piece on " + compMove.Item1 + " to " + compMove.Item2);
-                Console.WriteLine(PrintBoard());
-                if (gm.CheckGameEnd())
-                {
-                    Console.WriteLine("Computer won.");
-                    break;
-                }
+                PlayComputerFirst();
             }
-
             Console.ReadLine();
         }
 
@@ -90,5 +52,142 @@ namespace MerelsRules.ConsoleApp
             Array.Copy(data, index, result, 0, length);
             return result;
         }
+
+        public static void PlayPlayerFirst()
+        {
+            //placement -- player goes first
+            Console.WriteLine(PrintBoard());
+            for (int i = 0; i < 3; i++)
+            {
+                Console.WriteLine("Where do you want to place your piece?");
+                int loc = int.Parse(Console.ReadLine());
+                Console.WriteLine();
+                //player placement
+                gm.MakeMove(-1, loc);
+                Console.WriteLine("Your placement:");
+                Console.WriteLine(PrintBoard());
+                if (gm.CheckGameEnd())
+                {
+                    Console.WriteLine("You won!");
+                    Console.ReadLine();
+                    return;
+                }
+                //computer placement
+                Tuple<int, int> compMove = gm.MakeMove(-1, loc);
+                Console.WriteLine("The computer placed a piece on " + compMove.Item2);
+                Console.WriteLine(PrintBoard());
+                if (gm.CheckGameEnd())
+                {
+                    Console.ReadLine();
+                    return;
+                }
+            }
+
+            Console.WriteLine("\nBeginning Game\n");
+            Console.WriteLine(PrintBoard());
+
+            //moves -- player goes first
+            while (true)
+            {
+                Console.WriteLine("What piece do you want to move (0-9)? ");
+                int initial = int.Parse(Console.ReadLine());
+                Console.WriteLine("Where do you want to move the piece (0-9)? ");
+                int destination = int.Parse(Console.ReadLine());
+                Console.WriteLine();
+                //player move
+                gm.MakeMove(initial, destination);
+                Console.WriteLine("Your move:");
+                Console.WriteLine(PrintBoard() + "\n");
+                if (gm.CheckGameEnd())
+                {
+                    Console.WriteLine("You won!");
+                    break;
+                }
+                //computer move
+                Tuple<int, int> compMove = gm.MakeMove(initial, destination);
+                Console.WriteLine("The computer moved the piece on " + compMove.Item1 + " to " + compMove.Item2);
+                Console.WriteLine(PrintBoard());
+                if (gm.CheckGameEnd())
+                {
+                    Console.WriteLine("Computer won.");
+                    break;
+                }
+            }
+        }
+
+        public static void PlayComputerFirst()
+        {
+            //placement -- computer goes first
+            Console.WriteLine("The computer placed a piece on 4");
+            gm.Board[4] = GameManager.Piece.X;
+            gm.PieceLocations[3] = 4;
+            Console.WriteLine(PrintBoard());
+            for (int i = 0; i < 2; i++)
+            {
+                Console.WriteLine("Where do you want to place your piece?");
+                int loc = int.Parse(Console.ReadLine());
+                Console.WriteLine();
+                //player placement
+                gm.MakeMove(-1, loc);
+                Console.WriteLine("Your placement:");
+                Console.WriteLine(PrintBoard());
+                if (gm.CheckGameEnd())
+                {
+                    Console.WriteLine("You won!");
+                    Console.ReadLine();
+                    return;
+                }
+                //computer placement
+                Tuple<int, int> compMove = gm.MakeMove(-1, loc);
+                Console.WriteLine("The computer placed a piece on " + compMove.Item2);
+                Console.WriteLine(PrintBoard());
+                if (gm.CheckGameEnd())
+                {
+                    Console.ReadLine();
+                    return;
+                }
+            }
+            Console.WriteLine("Where do you want to place your piece?");
+            int location = int.Parse(Console.ReadLine());
+            Console.WriteLine();
+            //player placement
+            gm.MakeMove(-1, location);
+            Console.WriteLine("Your placement:");
+            Console.WriteLine(PrintBoard());
+            if (gm.CheckGameEnd())
+            {
+                Console.WriteLine("You won!");
+                Console.ReadLine();
+                return;
+            }
+
+            //moves -- computer goes first
+            while (true)
+            {
+                //computer move
+                Tuple<int, int> compMove = gm.MakeMove(0, 0);
+                Console.WriteLine("The computer moved the piece on " + compMove.Item1 + " to " + compMove.Item2);
+                Console.WriteLine(PrintBoard());
+                if (gm.CheckGameEnd())
+                {
+                    Console.WriteLine("Computer won.");
+                    break;
+                }
+                //player move
+                Console.WriteLine("What piece do you want to move (0-9)? ");
+                int initial = int.Parse(Console.ReadLine());
+                Console.WriteLine("Where do you want to move the piece (0-9)? ");
+                int destination = int.Parse(Console.ReadLine());
+                Console.WriteLine();
+                gm.MakeMove(initial, destination);
+                Console.WriteLine("Your move:");
+                Console.WriteLine(PrintBoard() + "\n");
+                if (gm.CheckGameEnd())
+                {
+                    Console.WriteLine("You won!");
+                    break;
+                }
+            }
+        } 
     }
 }
