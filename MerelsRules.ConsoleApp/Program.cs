@@ -16,7 +16,7 @@ namespace MerelsRules.ConsoleApp
             //    gm.Board[loc] = p;
             //    gm.PieceLocations[((i % 2) * 3) + (i / 2)] = loc;
             //}
-            int[] locations = new[] { 0, 1, 2, 3, 7, 8 };
+            int[] locations = new[] { 0, 1, 2, 6, 7, 8 };
             for (int i = 0; i < 6; i++)
             {
                 GameManager.Piece p = i % 2 == 0 ? GameManager.Piece.O : GameManager.Piece.X;

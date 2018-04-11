@@ -17,7 +17,7 @@ namespace MerelsRules
             { 0, 4, 8 }, { 2, 4, 6 }
         };
 
-        private const int MaxDepth = 3;
+        private const int MaxDepth = 10;
 
         // stores location of all pieces in board (indexes 0-9), to print out
         public Piece[] Board;
@@ -73,7 +73,7 @@ namespace MerelsRules
             }
             else if (CurrentTurn == Computer)
             {
-                MiniMax(new Tuple<Piece[], int[]>(Board, PieceLocations), CurrentTurn, 0);
+                int score = MiniMax(new Tuple<Piece[], int[]>(Board, PieceLocations), CurrentTurn, 0);
                 var boardAndPieceLocations = MakeBoardMove(Board, PieceLocations, CurrentTurn, _choiceInitial, _choiceDestination);
                 Board = boardAndPieceLocations.Item1;
                 PieceLocations = boardAndPieceLocations.Item2;
@@ -163,7 +163,7 @@ namespace MerelsRules
 
         private static bool CheckGameWin(Piece[] board, Piece player)
         {
-            for (int i = 0; i < winConditions.GetUpperBound(1); i++)
+            for (int i = 0; i <= winConditions.GetUpperBound(0); i++)
             {
                 if
                 (
