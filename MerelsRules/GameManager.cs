@@ -81,7 +81,7 @@ namespace MerelsRules
             }
             else if (CurrentTurn == Computer)
             {
-                int score = MiniMax(new Tuple<Piece[], int[]>(Board, PieceLocations), CurrentTurn, 0);
+                Tuple<int, int> score = MiniMax(new Tuple<Piece[], int[]>(Board, PieceLocations), CurrentTurn, 0);
                 Tuple<Piece[], int[]> boardAndPieceLocations;
                 if (!CheckPlacementDone(PieceLocations, CurrentTurn))
                 {
@@ -99,7 +99,7 @@ namespace MerelsRules
             return null;
         }
 
-        private int MiniMax(Tuple<Piece[], int[]> boardAndLocations, Piece player, int depth)
+        private Tuple<int, int> MiniMax(Tuple<Piece[], int[]> boardAndLocations, Piece player, int depth)
         {
             Piece[] inputBoard = boardAndLocations.Item1;
             int[] inputPieceLocations = boardAndLocations.Item2;
@@ -111,10 +111,10 @@ namespace MerelsRules
             Array.Copy(inputPieceLocations, pieceLocations, inputPieceLocations.Length);
 
             if (CheckScore(board, Computer) != 0)
-                return CheckScore(board, Computer);
-            else if (CheckGameEnd(board) || depth >= MaxDepth) return 0;
+                return new Tuple<int, int>(CheckScore(board, Computer), depth);
+            else if (depth >= MaxDepth) return new Tuple<int, int>(0, depth);
 
-            List<int> scores = new List<int>();
+            List<Tuple<int, int>> scores = new List<Tuple<int, int>>();
             List<Tuple<int, int>> moves = new List<Tuple<int, int>>();
 
             if(!CheckPlacementDone(pieceLocations, player))
@@ -123,7 +123,8 @@ namespace MerelsRules
                 {
                     if(board[l] == Piece.Empty)
                     {
-                        scores.Add(MiniMax(MakeBoardPlacement(board, pieceLocations, player, l), SwitchPiece(player), depth + 1));
+                        Tuple<int, int> score = MiniMax(MakeBoardPlacement(board, pieceLocations, player, l), SwitchPiece(player), depth + 1);
+                        scores.Add(score);
                         moves.Add(new Tuple<int, int>(-1, l));
                     }
                 }
@@ -134,25 +135,26 @@ namespace MerelsRules
                 {
                     foreach (int m in GetMoves(board, player, pieceLocations[p]))
                     {
-                        scores.Add(MiniMax(MakeBoardMove(board, pieceLocations, player, pieceLocations[p], m), SwitchPiece(player), depth + 1));
-                        moves.Add(new Tuple<int, int>(pieceLocations[p], m));
+                        Tuple<int, int> score = MiniMax(MakeBoardMove(board, pieceLocations, player, pieceLocations[p], m), SwitchPiece(player), depth + 1);
+                        scores.Add(score);
+                        moves.Add(new Tuple<int, int>(pieceLocations[p], m));                       
                     }
                 }
             }
 
             if (player == Computer)
             {
-                int MaxScoreIndex = scores.IndexOf(scores.Max());
+                int MaxScoreIndex = GetMaxScoreIndex(scores);
                 _choiceInitial = moves[MaxScoreIndex].Item1;
                 _choiceDestination = moves[MaxScoreIndex].Item2;
-                return scores.Max();
+                return scores[MaxScoreIndex];
             }
             else
             {
-                int MinScoreIndex = scores.IndexOf(scores.Min());
+                int MinScoreIndex = GetMaxScoreIndex(scores);
                 _choiceInitial = moves[MinScoreIndex].Item1;
                 _choiceDestination = moves[MinScoreIndex].Item2;
-                return scores.Min();
+                return scores[MinScoreIndex];
             }
         }
 
@@ -184,11 +186,41 @@ namespace MerelsRules
             return moves;
         }
 
+        private static int GetMaxScoreIndex(List<Tuple<int, int>> scores)
+        {
+            int maxInd = 0;
+            int max = 0;
+            for (int i = 0; i < scores.Count; i++)
+            {
+                if (scores[i].Item1 - scores[i].Item2 > max)
+                {
+                    maxInd = i;
+                    max = scores[i].Item1 - scores[i].Item2;
+                }
+            }
+            return maxInd;
+        }
+
+        private static int GetMinScoreIndex(List<Tuple<int, int>> scores)
+        {
+            int minInd = 0;
+            int min = 0;
+            for (int i = 0; i < scores.Count; i++)
+            {
+                if (scores[i].Item1 - scores[i].Item2 < min)
+                {
+                    minInd = i;
+                    min = scores[i].Item1 - scores[i].Item2;
+                }
+            }
+            return minInd;
+        }
+
         private static int CheckScore(Piece[] board, Piece player)
         {
-            if (CheckGameWin(board, player)) return 10;
-
-            else if (CheckGameWin(board, SwitchPiece(player))) return -10;
+            if (CheckGameWin(board, player)) return 100;
+            
+            else if (CheckGameWin(board, SwitchPiece(player))) return -100;
 
             else return 0;
         }
