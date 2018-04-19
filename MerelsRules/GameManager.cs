@@ -62,6 +62,11 @@ namespace MerelsRules
             Computer = SwitchPiece(Player);
         }
 
+        public bool CheckGameEnd()
+        {
+            return CheckGameEnd(Board);
+        }
+
         public Tuple<int, int> MakeMove(int moveInitial, int moveDestination)
         {
             if (CurrentTurn == Player)
@@ -109,7 +114,7 @@ namespace MerelsRules
 
             int[] pieceLocations = new int[inputPieceLocations.Length];
             Array.Copy(inputPieceLocations, pieceLocations, inputPieceLocations.Length);
-
+            
             if (CheckScore(board, Computer) != 0)
                 return new Tuple<int, int>(CheckScore(board, Computer), depth);
             else if (depth >= MaxDepth) return new Tuple<int, int>(0, depth);
@@ -151,16 +156,11 @@ namespace MerelsRules
             }
             else
             {
-                int MinScoreIndex = GetMaxScoreIndex(scores);
+                int MinScoreIndex = GetMinScoreIndex(scores);
                 _choiceInitial = moves[MinScoreIndex].Item1;
                 _choiceDestination = moves[MinScoreIndex].Item2;
                 return scores[MinScoreIndex];
             }
-        }
-
-        public bool CheckGameEnd()
-        {
-            return CheckGameEnd(Board);
         }
 
         private static List<int> GetMoves(Piece[] board, Piece player, int location)
@@ -189,8 +189,8 @@ namespace MerelsRules
         private static int GetMaxScoreIndex(List<Tuple<int, int>> scores)
         {
             int maxInd = 0;
-            int max = 0;
-            for (int i = 0; i < scores.Count; i++)
+            int max = scores[0].Item1 - scores[0].Item2;
+            for (int i = 1; i < scores.Count; i++)
             {
                 if (scores[i].Item1 - scores[i].Item2 > max)
                 {
@@ -204,13 +204,13 @@ namespace MerelsRules
         private static int GetMinScoreIndex(List<Tuple<int, int>> scores)
         {
             int minInd = 0;
-            int min = 0;
-            for (int i = 0; i < scores.Count; i++)
+            int min = scores[0].Item1 + scores[0].Item2;
+            for (int i = 1; i < scores.Count; i++)
             {
-                if (scores[i].Item1 - scores[i].Item2 < min)
+                if (scores[i].Item1 + scores[i].Item2 < min)
                 {
                     minInd = i;
-                    min = scores[i].Item1 - scores[i].Item2;
+                    min = scores[i].Item1 + scores[i].Item2;
                 }
             }
             return minInd;
@@ -271,26 +271,24 @@ namespace MerelsRules
 
         private static Tuple<Piece[], int[]> MakeBoardPlacement(Piece[] board, int[] pieceLocations, Piece piece, int location)
         {
-            //changes location of piece in board
+            //sets location of piece in board
             Piece[] newBoard = new Piece[board.Length];
             Array.Copy(board, newBoard, board.Length);
             newBoard[location] = piece;
 
-            //changes location of piece in list of piece locations
+            //sets location of piece in list of piece locations
             int[] newPieceLocations = new int[pieceLocations.Length];
             Array.Copy(pieceLocations, newPieceLocations, pieceLocations.Length);
             int index = ((int)piece - 1) * 3;
-            newPieceLocations[Array.IndexOf(newPieceLocations, -1, index)] = location;
+            newPieceLocations[Array.IndexOf(newPieceLocations, -1, index, 3)] = location;
 
             return new Tuple<Piece[], int[]>(newBoard, newPieceLocations);
         }
 
         private static bool CheckPlacementDone(int[] pieceLocations, Piece player)
         {
-            int[] newPieceLocations = new int[pieceLocations.Length];
-            int index = ((int)player - 1) * 3;
-            Array.Copy(pieceLocations, index, newPieceLocations, 0, 3);
-            return Array.IndexOf(newPieceLocations, -1) < 0;
+            return Array.IndexOf(pieceLocations, -1, ((int)player - 1) * 3, 3) < 0;
         }
+
     }
 }

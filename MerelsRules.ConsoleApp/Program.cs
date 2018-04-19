@@ -24,7 +24,6 @@ namespace MerelsRules.ConsoleApp
 
         private static GameManager gm;
 
-
         private static string PrintBoard()
         {
             string result = "";
@@ -59,7 +58,7 @@ namespace MerelsRules.ConsoleApp
             Console.WriteLine(PrintBoard());
             for (int i = 0; i < 3; i++)
             {
-                Console.WriteLine("Where do you want to place your piece?");
+                Console.WriteLine("Where do you want to place your piece (0-9)?");
                 int loc = int.Parse(Console.ReadLine());
                 Console.WriteLine();
                 //player placement
@@ -69,7 +68,6 @@ namespace MerelsRules.ConsoleApp
                 if (gm.CheckGameEnd())
                 {
                     Console.WriteLine("You won!");
-                    Console.ReadLine();
                     return;
                 }
                 //computer placement
@@ -78,7 +76,7 @@ namespace MerelsRules.ConsoleApp
                 Console.WriteLine(PrintBoard());
                 if (gm.CheckGameEnd())
                 {
-                    Console.ReadLine();
+                    Console.WriteLine("Computer won.");
                     return;
                 }
             }
@@ -101,7 +99,7 @@ namespace MerelsRules.ConsoleApp
                 if (gm.CheckGameEnd())
                 {
                     Console.WriteLine("You won!");
-                    break;
+                    return;
                 }
                 //computer move
                 Tuple<int, int> compMove = gm.MakeMove(initial, destination);
@@ -110,7 +108,7 @@ namespace MerelsRules.ConsoleApp
                 if (gm.CheckGameEnd())
                 {
                     Console.WriteLine("Computer won.");
-                    break;
+                    return;
                 }
             }
         }
@@ -143,6 +141,7 @@ namespace MerelsRules.ConsoleApp
                 Console.WriteLine(PrintBoard());
                 if (gm.CheckGameEnd())
                 {
+                    Console.WriteLine("Computer won.");
                     Console.ReadLine();
                     return;
                 }
@@ -150,7 +149,6 @@ namespace MerelsRules.ConsoleApp
             Console.WriteLine("Where do you want to place your piece?");
             int location = int.Parse(Console.ReadLine());
             Console.WriteLine();
-            //player placement
             gm.MakeMove(-1, location);
             Console.WriteLine("Your placement:");
             Console.WriteLine(PrintBoard());
@@ -171,7 +169,8 @@ namespace MerelsRules.ConsoleApp
                 if (gm.CheckGameEnd())
                 {
                     Console.WriteLine("Computer won.");
-                    break;
+                    Console.ReadLine();
+                    return;
                 }
                 //player move
                 Console.WriteLine("What piece do you want to move (0-9)? ");
@@ -185,7 +184,8 @@ namespace MerelsRules.ConsoleApp
                 if (gm.CheckGameEnd())
                 {
                     Console.WriteLine("You won!");
-                    break;
+                    Console.ReadLine();
+                    return;
                 }
             }
         } 
